@@ -254,10 +254,18 @@ public:
 
         if (rc) {
             LOG_ERROR(("yield:zookeeper_interest returned error: %d - %s\n", rc, zerror(rc)));
+            if (uv_is_active((uv_handle_t * ) & zk_io)) {
+                uv_poll_stop( & zk_io);
+            }
+            uv_timer_start( & zk_timer, & zk_timer_cb, 5000, 0);
             return;
         }
 
         if (fd == -1 ) {
+            if (uv_is_active((uv_handle_t * ) & zk_io)) {
+                uv_poll_stop( & zk_io);
+            }
+            uv_timer_start( & zk_timer, & zk_timer_cb, 5000, 0);
             return;
         }
 
